@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank App</title>
+</head>
+<body>
+
+<h1>Simple Bank App</h1>
+
+<!-- SIGNUP -->
+<h2>Signup</h2>
+<input id="name" placeholder="Name"><br><br>
+<input id="password" placeholder="Password"><br><br>
+<button onclick="signup()">Signup</button>
+
+<hr>
+
+<!-- LOGIN -->
+<h2>Login</h2>
+<input id="acc" placeholder="Account Number"><br><br>
+<input id="pass" placeholder="Password"><br><br>
+<button onclick="login()">Login</button>
+
+<hr>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+    <h2>Dashboard</h2>
+
+    <p id="welcome"></p>
+    <p id="balance">Balance: </p>
+
+    <h3>Deposit</h3>
+    <input id="depositAmt" placeholder="Amount">
+    <button onclick="deposit()">Deposit</button>
+
+    <h3>Withdraw</h3>
+    <input id="withdrawAmt" placeholder="Amount">
+    <button onclick="withdraw()">Withdraw</button>
+
+    <br><br>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+let currentAcc = "";
+
+// ---------------- SIGNUP ----------------
+function signup() {
+    let name = document.getElementById("name").value;
+    let password = document.getElementById("password").value;
+
+    fetch("http://localhost:8080/signup", {
+        method: "POST",
+        body: name + "," + password
+    })
+    .then(res => res.text())
+    .then(data => alert(data));
+}
+
+// ---------------- LOGIN ----------------
+function login() {
+    let acc = document.getElementById("acc").value;
+    let pass = document.getElementById("pass").value;
+
+    fetch("http://localhost:8080/login", {
+        method: "POST",
+        body: acc + "," + pass
+    })
+    .then(res => res.text())
+    .then(data => {
+        alert(data);
+
+        if (data.includes("successful")) {
+            currentAcc = acc;
+            document.getElementById("dashboard").style.display = "block";
+            document.getElementById("welcome").innerText = "Logged in as: " + acc;
+            getBalance();
+        }
+    });
+}
+
+// ---------------- GET BALANCE ----------------
+function getBalance() {
+    fetch("http://localhost:8080/balance", {
+        method: "POST",
+        body: currentAcc
+    })
+    .then(res => res.text())
+    .then(data => {
+        document.getElementById("balance").innerText = "Balance: " + data;
+    });
+}
+
+// ---------------- DEPOSIT ----------------
+function deposit() {
+    let amt = document.getElementById("depositAmt").value;
+
+    fetch("http://localhost:8080/deposit", {
+        method: "POST",
+        body: currentAcc + "," + amt
+    })
+    .then(res => res.text())
+    .then(data => {
+        alert(data);
+        getBalance();
+    });
+}
+
+// ---------------- WITHDRAW ----------------
+function withdraw() {
+    let amt = document.getElementById("withdrawAmt").value;
+
+    fetch("http://localhost:8080/withdraw", {
+        method: "POST",
+        body: currentAcc + "," + amt
+    })
+    .then(res => res.text())
+    .then(data => {
+        alert(data);
+        getBalance();
+    });
+}
+
+// ---------------- LOGOUT ----------------
+function logout() {
+    currentAcc = "";
+    document.getElementById("dashboard").style.display = "none";
+}
+</script>
+
+</body>
+</html>
